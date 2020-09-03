@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
 from .forms import UserSignUpForm
-from .models import User, FollowAuthor
+from .models import User
 from recipes.models import Recipe
 
 
@@ -19,7 +19,8 @@ class SignUp(CreateView):
 def author_page(request, username):
     author = get_object_or_404(User, username=username)
     recipes = Recipe.objects.filter(
-        author=author).select_related('author').prefetch_related('tags')
+        author=author).select_related(
+            'author').prefetch_related('tags').order_by('-pub_date')
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -28,11 +29,3 @@ def author_page(request, username):
         request, 'authorRecipe.html',
         {'profile': author, 'page': page,
          'paginator': paginator, 'index': index})
-
-
-# def follow(request):
-#     follow_page = True
-#     authors = FollowAuthor.objects.get(
-#         user=request.user).authors.order_by('username').all()
-    
-#     return render()
