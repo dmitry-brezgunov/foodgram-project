@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
 from .forms import UserSignUpForm
-from .models import User
+from .models import User, FollowAuthor
 from recipes.models import Recipe
 
 
@@ -29,3 +29,18 @@ def author_page(request, username):
         request, 'authorRecipe.html',
         {'profile': author, 'page': page,
          'paginator': paginator, 'index': index})
+
+
+@login_required
+def subscriptions_page(request):
+    authors_list = []
+    if FollowAuthor.objects.filter(user=request.user).exists():
+        authors_list = FollowAuthor.objects.get(
+            user=request.user).authors.all()
+    paginator = Paginator(authors_list, 6)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    subscriptions = True
+    return render(
+        request, 'myFollow.html',
+        {'page': page, 'paginator': paginator, 'subscriptions': subscriptions})

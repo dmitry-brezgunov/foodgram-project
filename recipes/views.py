@@ -38,9 +38,11 @@ def recipe_page(request, pk):
     recipe = get_object_or_404(Recipe.objects.select_related('author'), pk=pk)
     ingredients = recipe.ingredientamount_set.all()
     tags = recipe.tags.all()
+    index = True
     return render(
         request, 'singlePage.html',
-        {'recipe': recipe, 'ingredients': ingredients, 'tags': tags})
+        {'recipe': recipe, 'ingredients': ingredients,
+         'tags': tags, 'index': index})
 
 
 @login_required
