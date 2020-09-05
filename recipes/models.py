@@ -75,7 +75,11 @@ class FavoriteRecipes(models.Model):
         User, on_delete=models.CASCADE, related_name='favorite_recipes',
         verbose_name='Пользователь')
     recipes = models.ManyToManyField(
-        Recipe, related_name='favorite_recipes', verbose_name='Рецепты')
+        Recipe, related_name='favorite_recipes', verbose_name='Рецепты',
+        blank=True)
+
+    def __str__(self):
+        return f'Избранные рецепты {self.user}'
 
     class Meta:
         verbose_name = 'Избранный рецепт'
@@ -87,7 +91,10 @@ class ShopList(models.Model):
         User, on_delete=models.CASCADE, related_name='shop_list',
         verbose_name='Пользователь')
     recipes = models.ManyToManyField(
-        Recipe, related_name='shop_list', verbose_name='Рецепты')
+        Recipe, related_name='shop_list', verbose_name='Рецепты', blank=True)
+
+    def __str__(self):
+        return f'Список покупок {self.user}'
 
     class Meta:
         verbose_name = 'Список покупок'

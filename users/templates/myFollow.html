@@ -5,13 +5,14 @@
     <link rel="stylesheet" href="{% static 'pages/myFollow.css' %}">
 {% endblock %}
 {% block content %}
+{% csrf_token %}
 {% load user_filters %}
 <div class="main__header">
     <h1 class="main__title">Мои подписки</h1>
 </div>
 <div class="card-list">
     {% for author in page %}
-        <div class="card-user" data-id="{{ author.id }}">
+        <div class="card-user" data-id="{{ author.recipes.first.id }}">
             <div class="card-user__header">
                 <h2 class="card-user__title">{{ author.username }}</h2>
             </div>
@@ -28,13 +29,13 @@
                     {% endfor %}
                     {% if  author.recipes.count > 3 %}
                     <li class="card-user__item">
-                        <a href="{% url 'author_page' author.username %}" class="card-user__link link">Еще {{ author.recipes.count|add:"-3" }} рецепта...</a>
+                        <a href="{% url 'author_page' author.username %}" class="card-user__link link">Еще {{ author.recipes.count|add:"-3" }} {{ 'рецепт'|format_count:author.recipes.count }}...</a>
                     </li>
                     {% endif %}
                 </ul>
             </div>
             <div class="card-user__footer">
-                <button class="button button_style_light-blue button_size_auto" name="subscribe" data-out>Отписаться</button>
+                <button class="button button_style_light-blue button_size_auto" name="subscribe">Отписаться</button>
             </div>
         </div>
     {% endfor %}
@@ -50,5 +51,5 @@
     <script src="{% static 'js/components/Subscribe.js' %}"></script>
     <script src="{% static 'js/components/Header.js' %}"></script>
     <script src="{% static 'js/api/Api.js' %}"></script>
-    <script src="{% static 'myFollow.js' %}"></script>
+    <script src="{% static 'js/myFollow.js' %}"></script>
 {% endblock %}

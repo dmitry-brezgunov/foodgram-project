@@ -9,7 +9,11 @@ class FollowAuthor(models.Model):
         User, on_delete=models.CASCADE,
         related_name='follower', verbose_name='Подписчик')
     authors = models.ManyToManyField(
-        User, related_name='following', verbose_name='Избранный автор')
+        User, related_name='following', verbose_name='Избранный автор',
+        blank=True)
+
+    def __str__(self):
+        return f'Подписки {self.user}'
 
     class Meta:
         verbose_name = "Подписка на автора"

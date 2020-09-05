@@ -6,6 +6,4 @@ from .models import Recipe
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = (
-            'title', 'tags', 'ingredients', 'cook_time',
-            'description', 'image',)
+        fields = ('title', 'cook_time', 'description', 'image', )

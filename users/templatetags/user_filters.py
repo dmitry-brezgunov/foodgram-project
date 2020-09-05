@@ -12,6 +12,7 @@ def addclass(field, css):
 @register.filter
 def format_count(word, count):
     '''Фильтр для склонение слова 'рецепт' по числу'''
+    count -= 3
     remainder_ten = count % 10
     remainder_hundred = count % 100
     if remainder_ten == 0:

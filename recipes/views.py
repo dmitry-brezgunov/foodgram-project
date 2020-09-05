@@ -38,7 +38,7 @@ def new_recipe(request):
             recipe.save()
             return redirect('index')
     else:
-        form = RecipeForm()
+        form = RecipeForm(files=request.FILES or None)
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
     return render(request, 'formRecipe.html', {
@@ -55,10 +55,10 @@ def recipe_page(request, pk):
     if request.user.is_authenticated:
         shop_list = ShopList.objects.get_or_create(
             user=request.user)[0].recipes.all()
-        favorite = FavoriteRecipes.objects.get(
-            user=request.user).recipes.filter(pk=pk)
-        subscriptons_list = FollowAuthor.objects.get(
-            user=request.user).authors.all()
+        favorite = FavoriteRecipes.objects.get_or_create(
+            user=request.user)[0].recipes.filter(pk=pk)
+        subscriptons_list = FollowAuthor.objects.get_or_create(
+            user=request.user)[0].authors.all()
     return render(
         request, 'singlePage.html',
         {'recipe': recipe, 'ingredients': ingredients,
@@ -68,14 +68,11 @@ def recipe_page(request, pk):
 
 @login_required
 def favorite(request):
-    recipe_list = []
-    shop_list = []
-    if FavoriteRecipes.objects.filter(user=request.user).exists():
-        recipe_list = FavoriteRecipes.objects.get(
-            user=request.user).recipes.prefetch_related(
-                'tags').select_related('author').order_by('-pub_date').all()
-        shop_list = ShopList.objects.get_or_create(
-            user=request.user)[0].recipes.all()
+    recipe_list = FavoriteRecipes.objects.get(
+        user=request.user).recipes.prefetch_related(
+            'tags').select_related('author').order_by('-pub_date').all()
+    shop_list = ShopList.objects.get_or_create(
+        user=request.user)[0].recipes.all()
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -87,9 +84,8 @@ def favorite(request):
 
 
 def shop_list_page(request):
-    shop_list = []
-    if ShopList.objects.filter(user=request.user).exists():
-        shop_list = ShopList.objects.get(user=request.user).recipes.all()
+    shop_list = ShopList.objects.get_or_create(
+        user=request.user)[0].recipes.all()
     shop = True
     return render(
         request, 'shopList.html', {'shop_list': shop_list, 'shop': shop})
