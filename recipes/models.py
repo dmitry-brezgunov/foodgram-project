@@ -80,3 +80,15 @@ class FavoriteRecipes(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
+
+
+class ShopList(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='shop_list',
+        verbose_name='Пользователь')
+    recipes = models.ManyToManyField(
+        Recipe, related_name='shop_list', verbose_name='Рецепты')
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'

@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="{% static 'pages/single.css' %}">
 {% endblock %}
 {% block content %}
+{% csrf_token %}
 <div class="single-card" data-id="{{ recipe.id }}">
     <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="single-card__image">
     <div class="single-card__info">
@@ -12,8 +13,13 @@
             <h1 class="single-card__title">{{ recipe.title }}</h1>
             {% if user.is_authenticated %}
                 <div class="single-card__favorite">
-                    <button class="button button_style_none" name="favorites" data-out><span class="icon-favorite icon-favorite_big"></span></button>
-                    <div class="single-card__favorite-tooltip tooltip">Добавить в избранное</div>
+                    {% if favorite %}
+                        <button class="button button_style_none" name="favorites"><span class="icon-favorite icon-favorite_big icon-favorite_active"></span></button>
+                        <div class="single-card__favorite-tooltip tooltip">Удалить из избранного</div>
+                    {% else %}
+                        <button class="button button_style_none" name="favorites" data-out><span class="icon-favorite icon-favorite_big"></span></button>
+                        <div class="single-card__favorite-tooltip tooltip">Добавить в избранное</div>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
@@ -32,9 +38,17 @@
             </ul>
         </div>
         <ul class="single-card__items">
-            <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
-            {% if user.is_authenticated %}
-                <li class="single-card__item"><button class="button button_style_light-blue button_size_auto" name="subscribe" data-out>Подписаться на автора</button></li>
+            {% if recipe not in shop_list %}
+                <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
+            {% else %}
+                <li class="single-card__item"><button class="button button_style_light-blue-outline" name="purchpurchases"><span class="icon-check button__icon"></span>Рецепт добавлен</button></li>
+            {% endif %}
+            {% if user.is_authenticated and user != recipe.author %}
+                {% if recipe.author not in subscriptons_list %}
+                    <li class="single-card__item"><button class="button button_style_light-blue button_size_auto" name="subscribe" data-out>Подписаться на автора</button></li>
+                {% else %}
+                    <li class="single-card__item"><button class="button button_style_light-blue button_size_auto button_style_light-blue-outline" name="subscribe"><span class="icon-check button__icon"></span> Отписаться от автора</button></li>
+                {% endif %}
             {% endif %}
         </ul>
         <div class="single-card__section">
@@ -53,19 +67,20 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script src="{% static 'js/config/config.js' %}"></script>
+<script src="{% static 'js/components/Purchpurachases.js' %}"></script>
 {% if user.is_authenticated %}
     <script src="{% static 'js/components/Favorites.js' %}"></script>
     <script src="{% static 'js/components/Subscribe.js' %}"></script>
+{% endif %}
+<script src="{% static 'js/components/MainCards.js' %}"></script>
+<script src="{% static 'js/components/SingleCard.js' %}"></script>
+<script src="{% static 'js/components/Header.js' %}"></script>
+<script src="{% static 'js/api/Api.js'%}"></script>
+{% if user.is_authenticated %}
     <script src="{% static 'js/singlePage.js' %}"></script>
 {% else %}
     <script src="{% static 'js/singlePageNotAuth.js' %}"></script>
 {% endif %}
-
-<script src="{% static 'js/components/MainCards.js' %}"></script>
-<script src="{% static 'js/components/SingleCard.js' %}"></script>
-<script src="{% static 'js/components/Header.js' %}"></script>
-<script src="{% static 'js/components/Purchpurachases.js' %}"></script>
-
-<script src="{% static 'js/api/Api.js'%}"></script>
 
 {% endblock %}

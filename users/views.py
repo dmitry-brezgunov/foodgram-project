@@ -1,12 +1,14 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
-from django.shortcuts import get_object_or_404, render
-from django.core.paginator import Paginator
-from django.contrib.auth.decorators import login_required
+
+from recipes.models import Recipe, FavoriteRecipes, ShopList
 
 from .forms import UserSignUpForm
-from .models import User, FollowAuthor
-from recipes.models import Recipe
+from .models import FollowAuthor, User
 
 
 class SignUp(CreateView):
@@ -15,12 +17,35 @@ class SignUp(CreateView):
     template_name = 'registration/singup.html'
 
 
+class Login(LoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['signin'] = True
+        return context
+
+
+class PasswordChange(PasswordChangeView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['shop_list'] = ShopList.objects.get_or_create(
+            user=self.request.user)[0].recipes.all()
+        context['passwordchange'] = True
+        return context
+
+
 @login_required
 def author_page(request, username):
     author = get_object_or_404(User, username=username)
     recipes = Recipe.objects.filter(
         author=author).select_related(
             'author').prefetch_related('tags').order_by('-pub_date')
+    favorites_list = []
+    shop_list = []
+    if request.user.is_authenticated:
+        favorites_list = FavoriteRecipes.objects.get_or_create(
+            user=request.user)[0].recipes.all()
+        shop_list = ShopList.objects.get_or_create(
+            user=request.user)[0].recipes.all()
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -28,7 +53,8 @@ def author_page(request, username):
     return render(
         request, 'authorRecipe.html',
         {'profile': author, 'page': page,
-         'paginator': paginator, 'index': index})
+         'paginator': paginator, 'index': index,
+         'favorites_list': favorites_list, 'shop_list': shop_list})
 
 
 @login_required
@@ -37,10 +63,13 @@ def subscriptions_page(request):
     if FollowAuthor.objects.filter(user=request.user).exists():
         authors_list = FollowAuthor.objects.get(
             user=request.user).authors.all()
+    shop_list = ShopList.objects.get_or_create(
+        user=request.user)[0].recipes.all()
     paginator = Paginator(authors_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     subscriptions = True
     return render(
         request, 'myFollow.html',
-        {'page': page, 'paginator': paginator, 'subscriptions': subscriptions})
+        {'page': page, 'paginator': paginator, 'subscriptions': subscriptions,
+         'shop_list': shop_list})
