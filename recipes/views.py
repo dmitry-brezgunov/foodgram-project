@@ -50,6 +50,7 @@ def recipe_page(request, pk):
     ingredients = recipe.ingredientamount_set.all()
     tags = recipe.tags.all()
     index = True
+    subscriptons_list = []
     shop_list = []
     favorite = []
     if request.user.is_authenticated:

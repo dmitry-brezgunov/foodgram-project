@@ -3,7 +3,7 @@ from django.views.generic import View
 from django.http import JsonResponse
 
 from recipes.models import FavoriteRecipes, Recipe, ShopList
-from users.models import FollowAuthor
+from users.models import FollowAuthor, User
 
 
 class FavoritesView(View):
@@ -40,8 +40,8 @@ class PurchasesView(View):
 
 class SubscriptionsView(View):
     def post(self, request):
-        recipe_id = json.loads(request.body)['id']
-        author = Recipe.objects.get(pk=recipe_id).author
+        author_id = json.loads(request.body)['id']
+        author = User.objects.get(pk=author_id)
         if author == request.user:
             return JsonResponse({'success': False})
         user_subscriptions = FollowAuthor.objects.get_or_create(
@@ -49,8 +49,8 @@ class SubscriptionsView(View):
         user_subscriptions[0].authors.add(author)
         return JsonResponse({'success': True})
 
-    def delete(self, request, recipe_id):
-        author = Recipe.objects.get(pk=recipe_id).author
+    def delete(self, request, author_id):
+        author = User.objects.get(pk=author_id)
         user_subscriptions = FollowAuthor.objects.get(user=request.user)
         user_subscriptions.authors.remove(author)
         return JsonResponse({'success': True})

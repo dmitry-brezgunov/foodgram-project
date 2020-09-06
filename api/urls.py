@@ -12,6 +12,6 @@ urlpatterns = [
          name='delete_purchase'),
     path("subscriptions/", SubscriptionsView.as_view(),
          name='add_subscription'),
-    path("subscriptions/<int:recipe_id>/", SubscriptionsView.as_view(),
+    path("subscriptions/<int:author_id>/", SubscriptionsView.as_view(),
          name='delete_subscription'),
 ]

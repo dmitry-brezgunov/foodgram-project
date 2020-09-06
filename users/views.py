@@ -60,7 +60,7 @@ def author_page(request, username):
 @login_required
 def subscriptions_page(request):
     authors_list = FollowAuthor.objects.get_or_create(
-        user=request.user)[0].authors.order_by('username').all()
+        user=request.user)[0].authors.order_by('username')
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
     paginator = Paginator(authors_list, 6)

@@ -12,7 +12,7 @@
 </div>
 <div class="card-list">
     {% for author in page %}
-        <div class="card-user" data-id="{{ author.recipes.first.id }}">
+        <div class="card-user" data-id="{{ author.id }}">
             <div class="card-user__header">
                 <h2 class="card-user__title">{{ author.username }}</h2>
             </div>
@@ -21,8 +21,8 @@
                     {% for recipe in author.recipes.all|slice:":3" %}
                         <li class="card-user__item">
                             <div class="recipe">
-                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe__image">
-                                <h3 class="recipe__title"><a class="card-user__link link" href="{% url 'recipe_page' recipe.id %}">{{ recipe.title }}</a></h3>
+                                <a href="{% url 'recipe_page' recipe.id %}" class="link"><img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe__image"></a>
+                                <h3 class="recipe__title">{{ recipe.title }}</h3>
                                 <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
                             </div>
                         </li>
@@ -46,10 +46,13 @@
 {% endblock %}
 {% block scripts %}
     <script src="{% static 'js/config/config.js' %}"></script>
-    <script src="{% static 'js/components/MainCards.js' %}"></script>
-    <script src="{% static 'js/components/MyFollow.js' %}"></script>
+    <script src="{% static 'js/components/Purchpurachases.js' %}"></script>
+    <script src="{% static 'js/components/Favorites.js' %}"></script>
     <script src="{% static 'js/components/Subscribe.js' %}"></script>
+    <script src="{% static 'js/components/MainCards.js' %}"></script>
+    <script src="{% static 'js/components/SingleCard.js' %}"></script>
     <script src="{% static 'js/components/Header.js' %}"></script>
+    <script src="{% static 'js/components/MyFollow.js' %}"></script>
     <script src="{% static 'js/api/Api.js' %}"></script>
     <script src="{% static 'js/myFollow.js' %}"></script>
 {% endblock %}

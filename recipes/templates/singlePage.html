@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
 {% csrf_token %}
-<div class="single-card" data-id="{{ recipe.id }}">
+<div class="single-card" data-id="{{ recipe.id }}" author-id="{{ recipe.author.id }}">
     <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="single-card__image">
     <div class="single-card__info">
         <div class="single-card__header-info">
