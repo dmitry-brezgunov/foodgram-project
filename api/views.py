@@ -1,8 +1,9 @@
 import json
-from django.views.generic import View
-from django.http import JsonResponse
 
-from recipes.models import FavoriteRecipes, Recipe, ShopList
+from django.http import JsonResponse
+from django.views.generic import View
+
+from recipes.models import FavoriteRecipes, Ingredient, Recipe, ShopList
 from users.models import FollowAuthor, User
 
 
@@ -54,3 +55,18 @@ class SubscriptionsView(View):
         user_subscriptions = FollowAuthor.objects.get(user=request.user)
         user_subscriptions.authors.remove(author)
         return JsonResponse({'success': True})
+
+
+class IngredientsViews(View):
+    def get(self, request):
+        query = self.request.GET['query']
+        ingredients_list = Ingredient.objects.filter(
+            title__startswith=query).order_by('title')
+        response = []
+        for ingredient in ingredients_list:
+            title = ingredient.title
+            dimension = ingredient.dimension
+            item = {'title': title, 'dimension': dimension}
+            response.append(item)
+        print(ingredients_list)
+        return JsonResponse(response, safe=False)

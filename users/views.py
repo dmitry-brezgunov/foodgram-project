@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from recipes.models import Recipe, FavoriteRecipes, ShopList
+from recipes.models import FavoriteRecipes, Recipe, ShopList
 
 from .forms import UserSignUpForm
 from .models import FollowAuthor, User

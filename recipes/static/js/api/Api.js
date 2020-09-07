@@ -102,7 +102,7 @@ class Api {
         })
   }
   removeFavorites (id) {
-    return fetch(`/api/favorites/${id}/`, {
+    return fetch(`/api/favorites/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ class Api {
         })
   }
     getIngredients  (text)  {
-        return fetch(`/ingredients?query=${text}/`, {
+        return fetch(`/api/ingredients?query=${text}`, {
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value,
