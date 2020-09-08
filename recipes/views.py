@@ -5,12 +5,19 @@ from django.shortcuts import get_object_or_404, redirect, render
 from users.models import FollowAuthor
 
 from .forms import RecipeForm
-from .models import FavoriteRecipes, Recipe, ShopList
+from .models import FavoriteRecipes, Recipe, ShopList, Tag
 
 
 def index_page(request):
-    recipe_list = Recipe.objects.select_related(
-        'author').prefetch_related('tags').order_by('-pub_date').all()
+    if 'filters' in request.GET:
+        filters = request.GET.getlist('filters')
+        recipe_list = Recipe.objects.filter(
+            tags__slug__in=filters).distinct().order_by(
+                '-pub_date').select_related('author').prefetch_related('tags')
+    else:
+        recipe_list = Recipe.objects.select_related(
+            'author').prefetch_related('tags').order_by('-pub_date').all()
+    tags = Tag.objects.all()
     favorites_list = []
     shop_list = []
     if request.user.is_authenticated:
@@ -25,7 +32,8 @@ def index_page(request):
     return render(
         request, "index.html",
         {'page': page, 'paginator': paginator, 'index': index,
-         'favorites_list': favorites_list, 'shop_list': shop_list})
+         'favorites_list': favorites_list, 'shop_list': shop_list,
+         'tags': tags})
 
 
 @login_required
@@ -37,7 +45,8 @@ def new_recipe(request):
             recipe = form.save(commit=False)
             recipe.author = request.user
             recipe.save()
-            return redirect('index')
+            form.save_m2m()
+            return redirect('recipe_page', recipe_id=recipe.id)
     else:
         form = RecipeForm(files=request.FILES or None)
     shop_list = ShopList.objects.get_or_create(
@@ -46,8 +55,9 @@ def new_recipe(request):
         'form': form, 'new_recipe': new_recipe, 'shop_list': shop_list})
 
 
-def recipe_page(request, pk):
-    recipe = get_object_or_404(Recipe.objects.select_related('author'), pk=pk)
+def recipe_page(request, recipe_id):
+    recipe = get_object_or_404(
+        Recipe.objects.select_related('author'), pk=recipe_id)
     ingredients = recipe.ingredientamount_set.all()
     tags = recipe.tags.all()
     index = True
@@ -58,7 +68,7 @@ def recipe_page(request, pk):
         shop_list = ShopList.objects.get_or_create(
             user=request.user)[0].recipes.all()
         favorite = FavoriteRecipes.objects.get_or_create(
-            user=request.user)[0].recipes.filter(pk=pk)
+            user=request.user)[0].recipes.filter(pk=recipe_id)
         subscriptons_list = FollowAuthor.objects.get_or_create(
             user=request.user)[0].authors.all()
     return render(
@@ -70,19 +80,21 @@ def recipe_page(request, pk):
 
 @login_required
 def favorite(request):
-    recipe_list = FavoriteRecipes.objects.get(
-        user=request.user).recipes.prefetch_related(
-            'tags').select_related('author').order_by('-pub_date').all()
+    if 'filters' in request.GET:
+        recipe_list = FavoriteRecipes.objects.get(
+            user=request.user).recipes.filter().prefetch_related(
+                'tags').select_related('author').order_by('-pub_date').all()
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     favorite_page = True
+    tags = Tag.objects.all()
     return render(
         request, 'favorite.html',
         {'page': page, 'paginator': paginator, 'favorite_page': favorite_page,
-         'shop_list': shop_list})
+         'shop_list': shop_list, 'tags': tags})
 
 
 def shop_list_page(request):
@@ -91,3 +103,35 @@ def shop_list_page(request):
     shop = True
     return render(
         request, 'shopList.html', {'shop_list': shop_list, 'shop': shop})
+
+
+@login_required
+def recipe_edit(request, recipe_id):
+    new_recipe = True
+    edit = True
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    if request.user != recipe.author:
+        return redirect('recipe_page', recipe_id=recipe_id)
+    if request.method == 'POST':
+        form = RecipeForm(request.POST, request.FILE, instance=recipe)
+        if form.is_valid():
+            form.save()
+            return redirect('recipe_page', recipe_id=recipe_id)
+    else:
+        form = RecipeForm(instance=recipe)
+    shop_list = ShopList.objects.get_or_create(
+        user=request.user)[0].recipes.all()
+    tags = recipe.tags.all()
+    return render(
+        request, 'formRecipe.html',
+        {'form': form, 'new_recipe': new_recipe, 'shop_list': shop_list,
+         'edit': edit})
+
+
+@login_required
+def recipe_delete(request, recipe_id):
+    recipe = get_object_or_404(Recipe, pk=recipe_id)
+    if request.user == recipe.author:
+        recipe.delete()
+        return redirect('index')
+    return redirect('recipe_page', recipe_id=recipe_id)

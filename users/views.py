@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
 
-from recipes.models import FavoriteRecipes, Recipe, ShopList
+from recipes.models import FavoriteRecipes, Recipe, ShopList, Tag
 
 from .forms import UserSignUpForm
 from .models import FollowAuthor, User
@@ -36,9 +36,16 @@ class PasswordChange(PasswordChangeView):
 @login_required
 def author_page(request, username):
     author = get_object_or_404(User, username=username)
-    recipes = Recipe.objects.filter(
-        author=author).select_related(
-            'author').prefetch_related('tags').order_by('-pub_date')
+    print(request.path)
+    if 'filters' in request.GET:
+        filters = request.GET.getlist('filters')
+        recipes = Recipe.objects.filter(
+            author=author, tags__slug__in=filters).distinct().select_related(
+                'author').prefetch_related('tags').order_by('-pub_date')
+    else:
+        recipes = Recipe.objects.filter(
+            author=author).select_related(
+                'author').prefetch_related('tags').order_by('-pub_date')
     favorites_list = []
     shop_list = []
     if request.user.is_authenticated:
@@ -50,11 +57,13 @@ def author_page(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     index = True
+    tags = Tag.objects.all()
     return render(
         request, 'authorRecipe.html',
         {'profile': author, 'page': page,
          'paginator': paginator, 'index': index,
-         'favorites_list': favorites_list, 'shop_list': shop_list})
+         'favorites_list': favorites_list, 'shop_list': shop_list,
+         'tags': tags})
 
 
 @login_required

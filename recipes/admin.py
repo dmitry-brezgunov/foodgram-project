@@ -10,7 +10,7 @@ class IngredientAmountInLine(admin.TabularInline):
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('title', )
+    list_display = ('id', 'title', 'color', 'slug', )
     search_fields = ('title', )
 
 

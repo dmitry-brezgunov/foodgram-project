@@ -19,6 +19,7 @@ class Ingredient(models.Model):
 class Tag(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название')
     color = models.CharField(max_length=255, verbose_name='Цвет')
+    slug = models.SlugField(unique=True, verbose_name='Уникальный адрес')
 
     def __str__(self):
         return self.title
@@ -26,6 +27,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
+        ordering = ['id']
 
 
 class Recipe(models.Model):

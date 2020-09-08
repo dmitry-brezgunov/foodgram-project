@@ -68,5 +68,4 @@ class IngredientsViews(View):
             dimension = ingredient.dimension
             item = {'title': title, 'dimension': dimension}
             response.append(item)
-        print(ingredients_list)
         return JsonResponse(response, safe=False)

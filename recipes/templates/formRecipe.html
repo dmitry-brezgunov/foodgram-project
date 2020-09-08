@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Создание рецепта {% endblock %}
+{% block title %} {% if edit %} Редактирование рецепта {% else %} Создание рецепта {% endif %} {% endblock %}
 {% load static %}
 {% load user_filters %}
 {% block static %}
@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
 <div class="main__header">
-    <h1 class="main__title">Создание рецепта</h1>
+    <h1 class="main__title">{% if edit %} Редактирование рецепта {% else %} Создание рецепта {% endif %}</h1>
 </div>
 <div class="form-container">
     <form class="form" method="post" enctype="multipart/form-data">
@@ -26,21 +26,25 @@
         <div class="form__group">
             <p class="form__label">Теги</p>
             <div class="form__field-group">
-                <div class="tags">
-                    <div class="tags__item" required>
-                        <input type="checkbox" name="breakfast" id="id_breakfast" class="tags__checkbox tags__checkbox_style_orange">
-                        <label for="id_breakfast" class="tags__label">Завтрак</label>
-                    </div>
-                    <div class="tags__item">
-                        <input type="checkbox" name="lunch" id="id_lunch" class="tags__checkbox tags__checkbox_style_green" checked>
-                        <label for="id_lunch" class="tags__label">Обед</label>
-                    </div>
-                    <div class="tags__item">
-                        <input type="checkbox" name="dinner" id="id_dinner" class="tags__checkbox tags__checkbox_style_purple" checked>
-                        <label for="id_dinner" class="tags__label">Ужин</label>
-                    </div>
+                <div class="tags"> 
+                    {% for tag_choice, tag_value in form.tags.field.choices %}
+                        <div class="tags__item">
+                            <input
+                                type="checkbox" 
+                                name="tags"
+                                value="{{ tag_choice.instance.pk }}"
+                                id="id_{{ tag_choice.instance.slug }}"
+                                class="tags__checkbox tags__checkbox_style_{{ tag_choice.instance.color }}"
+                                {% if tag_choice.instance in form.instance.tags.all %} checked {% endif %}>
+                            <label for="id_{{ tag_choice.instance.slug }}" class="tags__label">{{ tag_choice.instance.title }}</label>
+                        </div>
+                    {% endfor %}
                 </div>
-                <span class="form__error"></span>
+                {% if form.errors %}
+                    {% for error in field.errors %}
+                        <span class="form__error">{{ error|escape }}</span>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         <div class="form__group">
@@ -100,7 +104,10 @@
             {% endfor %}
         {% endif %}
         <div class="form__footer">
-            <button class="button button_style_blue">Создать рецепт</button>
+            <button class="button button_style_blue">{% if edit %} Сохранить {% else %} Создать рецепт {% endif %}</button>
+            {% if edit %}
+                <a style="margin-left: 2.5em" href="{% url 'recipe_delete' form.instance.id %}" class="single-card__text"> Удалить </a>
+            {% endif %}
         </div>
     </form>
 </div>
