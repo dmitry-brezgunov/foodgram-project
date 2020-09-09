@@ -36,46 +36,53 @@ class PasswordChange(PasswordChangeView):
 @login_required
 def author_page(request, username):
     author = get_object_or_404(User, username=username)
-    print(request.path)
+
     if 'filters' in request.GET:
         filters = request.GET.getlist('filters')
         recipes = Recipe.objects.filter(
             author=author, tags__slug__in=filters).distinct().select_related(
                 'author').prefetch_related('tags').order_by('-pub_date')
+
     else:
         recipes = Recipe.objects.filter(
             author=author).select_related(
                 'author').prefetch_related('tags').order_by('-pub_date')
-    favorites_list = []
-    shop_list = []
-    if request.user.is_authenticated:
-        favorites_list = FavoriteRecipes.objects.get_or_create(
+
+    favorites_list = FavoriteRecipes.objects.get_or_create(
+        user=request.user)[0].recipes.all()
+    shop_list = ShopList.objects.get_or_create(
             user=request.user)[0].recipes.all()
-        shop_list = ShopList.objects.get_or_create(
-            user=request.user)[0].recipes.all()
+    subscriptions_list = FollowAuthor.objects.get_or_create(
+        user=request.user)[0].authors.all()
+
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     index = True
     tags = Tag.objects.all()
+
     return render(
         request, 'authorRecipe.html',
         {'profile': author, 'page': page,
          'paginator': paginator, 'index': index,
          'favorites_list': favorites_list, 'shop_list': shop_list,
-         'tags': tags})
+         'tags': tags, 'subscriptions_list': subscriptions_list})
 
 
 @login_required
 def subscriptions_page(request):
     authors_list = FollowAuthor.objects.get_or_create(
-        user=request.user)[0].authors.order_by('username')
+        user=request.user)[0].authors.prefetch_related(
+            'recipes').order_by('username')
+
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
+
     paginator = Paginator(authors_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     subscriptions = True
+
     return render(
         request, 'myFollow.html',
         {'page': page, 'paginator': paginator, 'subscriptions': subscriptions,

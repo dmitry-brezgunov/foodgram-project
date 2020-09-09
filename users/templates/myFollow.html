@@ -12,7 +12,7 @@
 </div>
 <div class="card-list">
     {% for author in page %}
-        <div class="card-user" data-id="{{ author.id }}">
+        <div class="card-user" data-author="{{ author.id }}">
             <div class="card-user__header">
                 <h2 class="card-user__title">{{ author.username }}</h2>
             </div>
@@ -21,21 +21,28 @@
                     {% for recipe in author.recipes.all|slice:":3" %}
                         <li class="card-user__item">
                             <div class="recipe">
-                                <a href="{% url 'recipe_page' recipe.id %}" class="link"><img src="{{ recipe.image.url }}" alt="{{ recipe.title }}" class="recipe__image"></a>
+                                <a href="{% url 'recipe_page' recipe.id %}" class="link">
+                                    <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}"
+                                     class="recipe__image"></a>
                                 <h3 class="recipe__title">{{ recipe.title }}</h3>
-                                <p class="recipe__text"><span class="icon-time"></span> {{ recipe.cook_time }} мин.</p>
+                                <p class="recipe__text"><span class="icon-time"></span>
+                                     {{ recipe.cook_time }} мин.</p>
                             </div>
                         </li>
                     {% endfor %}
                     {% if  author.recipes.count > 3 %}
                     <li class="card-user__item">
-                        <a href="{% url 'author_page' author.username %}" class="card-user__link link">Еще {{ author.recipes.count|add:"-3" }} {{ 'рецепт'|format_count:author.recipes.count }}...</a>
+                        <a href="{% url 'author_page' author.username %}"
+                         class="card-user__link link">
+                         Еще {{ author.recipes.count|add:"-3" }}
+                          {{ 'рецепт'|format_count:author.recipes.count }}...</a>
                     </li>
                     {% endif %}
                 </ul>
             </div>
             <div class="card-user__footer">
-                <button class="button button_style_light-blue button_size_auto" name="subscribe">Отписаться</button>
+                <button class="button button_style_light-blue button_size_auto"
+                 name="subscribe">Отписаться</button>
             </div>
         </div>
     {% endfor %}

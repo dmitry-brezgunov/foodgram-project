@@ -9,7 +9,19 @@
     <h1 class="main__title">{{ profile.username }}</h1>
     {% include "tags.html" with tags=tags %}
 </div>
-<p style="padding: 0 0 2em 0;"><a class="button button_style_light-blue" href="#">Подписаться на автора</a></p>
+{% if user != profile %}
+    <div class="author-subscribe" data-author="{{ profile.id }}">
+        {% if profile in subscriptions_list %}
+            <p style="padding: 0 0 2em 0;">
+                <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline"
+                 name="subscribe"><span class="icon-check button__icon"></span> Отписаться от автора</button></p>
+        {% else %}
+            <p style="padding: 0 0 2em 0;">
+                <button class="button button_style_light-blue button_size_auto"
+                 name="subscribe" data-out>Подписаться на автора</button></p>
+        {% endif %}
+    </div>
+{% endif %}
 <div class="card-list">
     {% for recipe in page %}
         {% include "recipe_item.html" with recipe=recipe %}
@@ -25,10 +37,10 @@
 
 <script src="{% static 'js/components/Purchpurachases.js' %}"></script>
 <script src="{% static 'js/components/Favorites.js' %}"></script>
-
-<script src="{% static 'js/components/CardList.js' %}"></script>
+<script src="{% static 'js/components/Subscribe.js' %}"></script>
+<script src="{% static 'js/components/AuthorRecipe.js' %}"></script>
 <script src="{% static 'js/components/Header.js' %}"></script>
 
 <script src="{% static 'js/api/Api.js' %}"></script>
-<script src="{% static 'js/indexAuth.js' %}"></script>
+<script src="{% static 'js/authorRecipe.js' %}"></script>
 {% endblock %}
