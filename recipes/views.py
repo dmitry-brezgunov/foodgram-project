@@ -1,6 +1,9 @@
+import csv
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import FileResponse
+from django.db.models import F, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from users.models import FollowAuthor
@@ -8,7 +11,7 @@ from users.models import FollowAuthor
 from .forms import RecipeForm
 from .models import (FavoriteRecipes, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
-from .utils import generate_shop_list_file, get_ingredients
+from .utils import get_ingredients
 
 
 def index_page(request):
@@ -175,9 +178,25 @@ def recipe_delete(request, recipe_id):
 @login_required
 def download_shop_list(request):
     recipes = ShopList.objects.get(user=request.user).recipes.all()
-    generate_shop_list_file(request, recipes)
-    return FileResponse(
-        open(f'media/shop-lists/{request.user}.txt', 'rb'), as_attachment=True)
+
+    ingredient_list = recipes.annotate(
+        name=F('ingredientamount__ingredient__title'),
+        dimension=F('ingredientamount__ingredient__dimension')).values(
+            'name', 'dimension').annotate(
+                total=Sum('ingredientamount__amount')).order_by('name')
+
+    response = HttpResponse(content_type='text/txt')
+    response['Content-Disposition'] = 'attachment; filename="shop-list.txt"'
+
+    writer = csv.writer(response)
+
+    for ingredient in ingredient_list:
+        name = ingredient['name']
+        dimension = ingredient['dimension']
+        total = ingredient['total']
+        writer.writerow([f'{name} ({dimension}) - {total}'])
+
+    return response
 
 
 def page_not_found(request, exception):
