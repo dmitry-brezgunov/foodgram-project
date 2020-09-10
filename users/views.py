@@ -33,7 +33,6 @@ class PasswordChange(PasswordChangeView):
         return context
 
 
-@login_required
 def author_page(request, username):
     author = get_object_or_404(User, username=username)
 
@@ -48,12 +47,17 @@ def author_page(request, username):
             author=author).select_related(
                 'author').prefetch_related('tags').order_by('-pub_date')
 
-    favorites_list = FavoriteRecipes.objects.get_or_create(
-        user=request.user)[0].recipes.all()
-    shop_list = ShopList.objects.get_or_create(
+    subscriptons_list = []
+    shop_list = []
+    favorites_list = []
+
+    if request.user.is_authenticated:
+        favorites_list = FavoriteRecipes.objects.get_or_create(
             user=request.user)[0].recipes.all()
-    subscriptions_list = FollowAuthor.objects.get_or_create(
-        user=request.user)[0].authors.all()
+        shop_list = ShopList.objects.get_or_create(
+                user=request.user)[0].recipes.all()
+        subscriptons_list = FollowAuthor.objects.get_or_create(
+            user=request.user)[0].authors.all()
 
     paginator = Paginator(recipes, 6)
     page_number = request.GET.get('page')
@@ -66,7 +70,7 @@ def author_page(request, username):
         {'profile': author, 'page': page,
          'paginator': paginator, 'index': index,
          'favorites_list': favorites_list, 'shop_list': shop_list,
-         'tags': tags, 'subscriptions_list': subscriptions_list})
+         'tags': tags, 'subscriptions_list': subscriptons_list})
 
 
 @login_required

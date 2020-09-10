@@ -7,6 +7,7 @@ from .models import (FavoriteRecipes, Ingredient, IngredientAmount, Recipe,
 class IngredientAmountInLine(admin.TabularInline):
     model = IngredientAmount
     extra = 1
+    autocomplete_fields = ('ingredient', )
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -15,10 +16,18 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'description', 'cook_time', )
-    search_fields = ('author', 'title', )
-    list_filter = ('tags', )
+    def favorites_count(self, obj):
+        return obj.favorite_recipes.count()
+
+    favorites_count.short_description = 'Кол-во добавлений в Избранное'
+
+    list_display = ('title', 'author', 'pub_date', )
+    search_fields = ('title', )
+    filter_horizontal = ('tags', )
+    list_filter = ('tags', 'pub_date', 'author', )
+    autocomplete_fields = ('ingredients', )
     inlines = (IngredientAmountInLine, )
+    readonly_fields = ('favorites_count', )
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -27,18 +36,20 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class IngredientAmountAdmin(admin.ModelAdmin):
-    list_display = ('ingredient', 'recipe', 'amount', )
+    list_display = ('id', 'ingredient', 'recipe', 'amount', )
     search_fields = ('ingredient', 'recipe', )
 
 
 class FavoriteRecipesAdmin(admin.ModelAdmin):
     list_display = ('user', )
     search_fields = ('user', )
+    filter_horizontal = ('recipes', )
 
 
 class ShopListAdmin(admin.ModelAdmin):
     list_display = ('user', )
     search_fields = ('user', )
+    filter_horizontal = ('recipes', )
 
 
 admin.site.register(Tag, TagAdmin)

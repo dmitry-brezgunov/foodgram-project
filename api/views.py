@@ -9,7 +9,7 @@ from users.models import FollowAuthor, User
 
 class FavoritesView(View):
     def post(self, request):
-        recipe_id = json.loads(request.body)['id']
+        recipe_id = json.loads(request.body).get('id')
         recipe = Recipe.objects.get(pk=recipe_id)
         user_favorites = FavoriteRecipes.objects.get_or_create(
             user=request.user)
@@ -25,7 +25,7 @@ class FavoritesView(View):
 
 class PurchasesView(View):
     def post(self, request):
-        recipe_id = json.loads(request.body)['id']
+        recipe_id = json.loads(request.body).get('id')
         recipe = Recipe.objects.get(pk=recipe_id)
         user_shop_list = ShopList.objects.get_or_create(
             user=request.user)
@@ -41,7 +41,7 @@ class PurchasesView(View):
 
 class SubscriptionsView(View):
     def post(self, request):
-        author_id = json.loads(request.body)['id']
+        author_id = json.loads(request.body).get('id')
         author = User.objects.get(pk=author_id)
 
         if author == request.user:
@@ -61,9 +61,9 @@ class SubscriptionsView(View):
 
 class IngredientsViews(View):
     def get(self, request):
-        query = self.request.GET['query'].lower()
+        query = self.request.GET['query']
         ingredients_list = Ingredient.objects.filter(
-            title__startswith=query).order_by('title')
+            title__istartswith=query).order_by('title')
         response = []
 
         for ingredient in ingredients_list:

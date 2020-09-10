@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from users.models import FollowAuthor
@@ -7,7 +8,7 @@ from users.models import FollowAuthor
 from .forms import RecipeForm
 from .models import (FavoriteRecipes, Ingredient, IngredientAmount, Recipe,
                      ShopList, Tag)
-from .utils import get_ingredients
+from .utils import generate_shop_list_file, get_ingredients
 
 
 def index_page(request):
@@ -110,7 +111,8 @@ def favorite(request):
 
     else:
         recipe_list = FavoriteRecipes.objects.get(
-            user=request.user).recipes.all()
+            user=request.user).recipes.prefetch_related(
+                'tags').select_related('author').all()
 
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
@@ -126,6 +128,7 @@ def favorite(request):
          'shop_list': shop_list, 'tags': tags})
 
 
+@login_required
 def shop_list_page(request):
     shop_list = ShopList.objects.get_or_create(
         user=request.user)[0].recipes.all()
@@ -165,5 +168,18 @@ def recipe_delete(request, recipe_id):
     recipe = get_object_or_404(Recipe, pk=recipe_id)
     if request.user == recipe.author:
         recipe.delete()
-        return redirect('index')
+        return redirect('author_page', username=recipe.author.username)
     return redirect('recipe_page', recipe_id=recipe_id)
+
+
+@login_required
+def download_shop_list(request):
+    recipes = ShopList.objects.get(user=request.user).recipes.all()
+    generate_shop_list_file(request, recipes)
+    return FileResponse(
+        open(f'media/shop-lists/{request.user}.txt', 'rb'), as_attachment=True)
+
+
+def page_not_found(request, exception):
+    '''Страница 404'''
+    return render(request, "404.html", {"path": request.path}, status=404)

@@ -14,6 +14,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        ordering = ('title', )
 
 
 class Tag(models.Model):
@@ -27,7 +28,7 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-        ordering = ['id']
+        ordering = ('id', )
 
 
 class Recipe(models.Model):
@@ -44,8 +45,6 @@ class Recipe(models.Model):
         Tag, related_name='recipes', verbose_name='Теги')
     cook_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления')
-    slug = models.SlugField(
-        unique=True, blank=True, null=True, verbose_name='Уникальный адрес')
     pub_date = models.DateTimeField(
         "Дата публикации", auto_now_add=True)
 
@@ -55,7 +54,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ['-pub_date']
+        ordering = ('-pub_date', )
 
 
 class IngredientAmount(models.Model):

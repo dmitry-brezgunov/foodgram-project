@@ -15,9 +15,12 @@ Including another URLconf
 """
 import debug_toolbar
 from django.conf import settings
+from django.conf.urls import handler404
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+
+handler404 = "recipes.views.page_not_found"  # noqa:F811
 
 urlpatterns = [
     path("admin/", admin.site.urls),

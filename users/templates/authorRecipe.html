@@ -9,18 +9,20 @@
     <h1 class="main__title">{{ profile.username }}</h1>
     {% include "tags.html" with tags=tags %}
 </div>
-{% if user != profile %}
-    <div class="author-subscribe" data-author="{{ profile.id }}">
-        {% if profile in subscriptions_list %}
-            <p style="padding: 0 0 2em 0;">
-                <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline"
-                 name="subscribe"><span class="icon-check button__icon"></span> Отписаться от автора</button></p>
-        {% else %}
-            <p style="padding: 0 0 2em 0;">
-                <button class="button button_style_light-blue button_size_auto"
-                 name="subscribe" data-out>Подписаться на автора</button></p>
-        {% endif %}
-    </div>
+{% if user.is_authenticated %}
+    {% if user != profile %}
+        <div class="author-subscribe" data-author="{{ profile.id }}">
+            {% if profile in subscriptions_list %}
+                <p style="padding: 0 0 2em 0;">
+                    <button class="button button_style_light-blue button_size_auto button_style_light-blue-outline"
+                    name="subscribe"><span class="icon-check button__icon"></span> Отписаться от автора</button></p>
+            {% else %}
+                <p style="padding: 0 0 2em 0;">
+                    <button class="button button_style_light-blue button_size_auto"
+                    name="subscribe" data-out>Подписаться на автора</button></p>
+            {% endif %}
+        </div>
+    {% endif %}
 {% endif %}
 <div class="card-list">
     {% for recipe in page %}
