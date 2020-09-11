@@ -4,7 +4,8 @@ from users.models import User
 
 
 class Ingredient(models.Model):
-    title = models.CharField(max_length=255, verbose_name='Название')
+    title = models.CharField(
+        max_length=255, db_index=True, verbose_name='Название')
     dimension = models.CharField(
         max_length=50, verbose_name='Единицы измерения')
 

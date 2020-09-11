@@ -20,7 +20,7 @@
             <div class="form__field-group">
                 {{ form.title|addclass:"form__input" }}
                 {% if form.errors %}
-                    {% for error in field.errors %}
+                    {% for error in form.title.errors %}
                         <span class="form__error">{{ error|escape }}</span>
                     {% endfor %}
                 {% endif %}
@@ -45,7 +45,7 @@
                     {% endfor %}
                 </div>
                 {% if form.errors %}
-                    {% for error in field.errors %}
+                    {% for error in form.tags.errors %}
                         <span class="form__error">{{ error|escape }}</span>
                     {% endfor %}
                 {% endif %}
@@ -62,8 +62,21 @@
                     <input type="number" id="cantidad" class="form__input" min="0">
                     <label for="cantidad" class="form__label" id="cantidadVal">шт.</label>
                 </div>
-                <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
-                <span class="form__error"></span>
+                <div class="form__field-group-ingredientes-container">
+                    {% if edit %}
+                        {% for ingredient in form.instance.ingredientamount_set.all %}
+                            <div class="form__field-item-ingredient" id="ing_{{ forloop.counter }}">
+                                <span>{{ ingredient.ingredient.title }} {{ ingredient.amount }} {{ ingredient.ingredient.dimension }}</span>
+                                <span class="form__field-item-delete"></span>
+                                <input id="nameIngredient_{{ forloop.counter }}" name="nameIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.title }}">
+                                <input id="valueIngredient_{{ forloop.counter }}" name="valueIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.amount }}">
+                                <input id="unitsIngredient_{{ forloop.counter }}" name="unitsIngredient_{{ forloop.counter }}" type="hidden" value="{{ ingredient.ingredient.dimension }}">
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            <span class="form__ingredient-link" id="addIng">Добавить ингредиент</span>
+            <span class="form__error"></span>
             </div>
         </div>
         <div class="form__group">
@@ -73,7 +86,7 @@
                 {{ form.cook_time|addclass:"form__input" }}
                 <label for="id_time" class="form__label">минут</label>
                 {% if form.errors %}
-                    {% for error in field.errors %}
+                    {% for error in form.cook_time.errors %}
                         <span class="form__error">{{ error|escape }}</span>
                     {% endfor %}
                 {% endif %}
@@ -84,7 +97,7 @@
             <div class="form__field-group">
                 {{ form.description|addclass:"form__textarea" }}
                 {% if form.errors %}
-                    {% for error in field.errors %}
+                    {% for error in form.description.errors %}
                         <span class="form__error">{{ error|escape }}</span>
                     {% endfor %}
                 {% endif %}
@@ -95,7 +108,7 @@
             <div class="form__field-group">
                 {{ form.image }}
                 {% if form.errors %}
-                    {% for error in field.errors %}
+                    {% for error in form.image.errors %}
                         <span class="form__error">{{ error|escape }}</span>
                     {% endfor %}
                 {% endif %}

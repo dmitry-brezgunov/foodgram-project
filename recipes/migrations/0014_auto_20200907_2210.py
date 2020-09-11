@@ -5,6 +5,7 @@ from django.db import migrations, transaction
 
 def add_ingredients(apps, schema_editor):
     Ingredient = apps.get_model('recipes', 'Ingredient')
+    Ingredient.objects.all().delete()
     with open('ingredients.json', encoding='utf-8') as file:
         ingredients = json.load(file)
         for ingredient in ingredients:

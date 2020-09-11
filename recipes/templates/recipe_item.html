@@ -20,10 +20,10 @@
     <div class="card__footer">
         {% if user.is_authenticated %}
             {% if recipe not in shop_list %}
-                <button class="button button_style_light-blue" name="purchpurchases" data-out>
+                <button class="button button_style_light-blue" name="purchases" data-out>
                     <span class="icon-plus button__icon"></span>Добавить в покупки</button>
             {% else %}
-                <button class="button button_style_light-blue-outline" name="purchpurchases">
+                <button class="button button_style_light-blue-outline" name="purchases">
                     <span class="icon-check button__icon"></span>Рецепт добавлен</button>
             {% endif %}
             {% if recipe not in favorites_list %}

@@ -52,18 +52,21 @@ def new_recipe(request):
 
     if request.method == 'POST':
         form = RecipeForm(request.POST, files=request.FILES or None)
+        ingredients = get_ingredients(request)
 
-        if form.is_valid():
+        if bool(ingredients) is False:
+            form.add_error(None, "Добавьте хотя бы один ингредиент")
+
+        elif form.is_valid():
             recipe = form.save(commit=False)
             recipe.author = request.user
             recipe.save()
-            ingredients = get_ingredients(request)
 
-            for title, amount in ingredients.items():
-                ingredient = Ingredient.objects.get(title=title)
-                amount = IngredientAmount(
-                    amount=amount, ingredient=ingredient, recipe=recipe)
-                amount.save()
+            objs = [IngredientAmount(
+                amount=amount, ingredient=Ingredient.objects.get(title=title),
+                recipe=recipe) for title, amount in ingredients.items()]
+
+            IngredientAmount.objects.bulk_create(objs)
             form.save_m2m()
             return redirect('recipe_page', recipe_id=recipe.id)
 
@@ -151,9 +154,21 @@ def recipe_edit(request, recipe_id):
         return redirect('recipe_page', recipe_id=recipe_id)
 
     if request.method == 'POST':
-        form = RecipeForm(request.POST, request.FILE, instance=recipe)
+        form = RecipeForm(
+            request.POST, files=request.FILES or None, instance=recipe)
+        ingredients = get_ingredients(request)
+
+        if bool(ingredients) is False:
+            form.add_error(None, "Добавьте хотя бы один ингредиент")
+
         if form.is_valid():
             form.save()
+            recipe.ingredientamount_set.all().delete()
+            objs = [IngredientAmount(
+                amount=amount, ingredient=Ingredient.objects.get(title=title),
+                recipe=recipe) for title, amount in ingredients.items()]
+
+            IngredientAmount.objects.bulk_create(objs)
             return redirect('recipe_page', recipe_id=recipe_id)
     else:
         form = RecipeForm(instance=recipe)
