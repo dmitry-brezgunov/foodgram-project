@@ -8,6 +8,7 @@ class FollowAuthor(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='follower', verbose_name='Подписчик')
+
     authors = models.ManyToManyField(
         User, related_name='following', verbose_name='Избранный автор',
         blank=True)

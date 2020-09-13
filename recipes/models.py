@@ -36,16 +36,21 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         related_name='recipes', verbose_name='Автор')
+
     title = models.CharField(max_length=255, verbose_name='Название')
     image = models.ImageField(upload_to='recipes/', verbose_name='Изображение')
     description = models.TextField(verbose_name='Описание')
+
     ingredients = models.ManyToManyField(
         Ingredient, through='IngredientAmount',
         related_name='recipes', verbose_name='Ингредиенты')
+
     tags = models.ManyToManyField(
         Tag, related_name='recipes', verbose_name='Теги')
+
     cook_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления')
+
     pub_date = models.DateTimeField(
         "Дата публикации", auto_now_add=True)
 
@@ -61,8 +66,10 @@ class Recipe(models.Model):
 class IngredientAmount(models.Model):
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиент')
+
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, verbose_name='Рецепт')
+
     amount = models.PositiveSmallIntegerField(verbose_name='Количество')
 
     def __str__(self):
@@ -77,6 +84,7 @@ class FavoriteRecipes(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='favorite_recipes',
         verbose_name='Пользователь')
+
     recipes = models.ManyToManyField(
         Recipe, related_name='favorite_recipes', verbose_name='Рецепты',
         blank=True)
@@ -93,6 +101,7 @@ class ShopList(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='shop_list',
         verbose_name='Пользователь')
+
     recipes = models.ManyToManyField(
         Recipe, related_name='shop_list', verbose_name='Рецепты', blank=True)
 
