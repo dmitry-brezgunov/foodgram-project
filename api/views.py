@@ -13,8 +13,10 @@ class FavoritesView(View, LoginRequiredMixin):
     def post(self, request):
         recipe_id = json.loads(request.body).get('id')
         recipe = get_object_or_404(Recipe, pk=recipe_id)
+
         user_favorites = FavoriteRecipes.objects.get_or_create(
-                             user=request.user)
+            user=request.user)
+
         user_favorites[0].recipes.add(recipe)
         return JsonResponse({'success': True})
 
@@ -29,8 +31,10 @@ class PurchasesView(View, LoginRequiredMixin):
     def post(self, request):
         recipe_id = json.loads(request.body).get('id')
         recipe = get_object_or_404(Recipe, pk=recipe_id)
+
         user_shop_list = ShopList.objects.get_or_create(
-                             user=request.user)
+            user=request.user)
+
         user_shop_list[0].recipes.add(recipe)
         return JsonResponse({'success': True})
 
@@ -50,7 +54,8 @@ class SubscriptionsView(View, LoginRequiredMixin):
             return JsonResponse({'success': False})
 
         user_subscriptions = FollowAuthor.objects.get_or_create(
-                                 user=request.user)
+            user=request.user)
+
         user_subscriptions[0].authors.add(author)
         return JsonResponse({'success': True})
 
@@ -64,9 +69,11 @@ class SubscriptionsView(View, LoginRequiredMixin):
 class IngredientsViews(View, LoginRequiredMixin):
     def get(self, request):
         query = self.request.GET['query']
+
         ingredients_list = Ingredient.objects.filter(
-                               title__istartswith=query
-                           ).values(
-                               'title', 'dimension'
-                           ).order_by()
+            title__istartswith=query
+        ).values(
+            'title', 'dimension'
+        ).order_by()
+
         return JsonResponse(list(ingredients_list), safe=False)

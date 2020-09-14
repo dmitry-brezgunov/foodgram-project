@@ -37,22 +37,23 @@ def author_page(request, username):
 
     if 'filters' in request.GET:
         filters = request.GET.getlist('filters')
+
         recipes = Recipe.objects.filter(
-                      author=author, tags__slug__in=filters
-                  ).distinct().select_related(
-                      'author'
-                  ).prefetch_related(
-                      'tags'
-                  ).order_by('-pub_date')
+            author=author, tags__slug__in=filters
+        ).distinct().select_related(
+            'author'
+        ).prefetch_related(
+            'tags'
+        ).order_by('-pub_date')
 
     else:
         recipes = Recipe.objects.filter(
-                      author=author
-                  ).select_related(
-                      'author'
-                  ).prefetch_related(
-                      'tags'
-                  ).order_by('-pub_date')
+            author=author
+        ).select_related(
+            'author'
+        ).prefetch_related(
+            'tags'
+        ).order_by('-pub_date')
 
     subscriptons_list = get_subscriptons_list(request)
     favorites_list = get_favorites_list(request)
@@ -74,10 +75,10 @@ def author_page(request, username):
 @login_required
 def subscriptions_page(request):
     authors_list = FollowAuthor.objects.get_or_create(
-                       user=request.user
-                   )[0].authors.prefetch_related(
-                       'recipes'
-                   ).order_by('username')
+        user=request.user
+    )[0].authors.prefetch_related(
+        'recipes'
+    ).order_by('username')
 
     paginator = Paginator(authors_list, 6)
     page_number = request.GET.get('page')

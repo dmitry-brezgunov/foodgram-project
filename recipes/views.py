@@ -15,22 +15,24 @@ from .utils import get_favorites_list, get_ingredients, get_subscriptons_list
 def index_page(request):
     if 'filters' in request.GET:
         filters = request.GET.getlist('filters')
+
         recipe_list = Recipe.objects.filter(
-                          tags__slug__in=filters
-                      ).distinct().order_by(
-                          '-pub_date'
-                      ).select_related(
-                          'author'
-                      ).prefetch_related(
-                          'tags')
+            tags__slug__in=filters
+        ).distinct().order_by(
+            '-pub_date'
+        ).select_related(
+            'author'
+        ).prefetch_related(
+            'tags')
+
     else:
         recipe_list = Recipe.objects.select_related(
-                          'author'
-                      ).prefetch_related(
-                          'tags'
-                      ).order_by(
-                          '-pub_date'
-                      ).all()
+            'author'
+        ).prefetch_related(
+            'tags'
+        ).order_by(
+            '-pub_date'
+        ).all()
 
     tags = Tag.objects.all()
     favorites_list = get_favorites_list(request)
@@ -54,7 +56,7 @@ def new_recipe(request):
         form = RecipeForm(request.POST, files=request.FILES or None)
         ingredients = get_ingredients(request)
 
-        if bool(ingredients) is False:
+        if not bool(ingredients):
             form.add_error(None, "Добавьте хотя бы один ингредиент")
 
         elif form.is_valid():
@@ -103,26 +105,27 @@ def recipe_page(request, recipe_id):
 def favorite(request):
     if 'filters' in request.GET:
         filters = request.GET.getlist('filters')
+
         recipe_list = FavoriteRecipes.objects.get(
-                          user=request.user
-                      ).recipes.filter(
-                          tags__slug__in=filters
-                      ).distinct().prefetch_related(
-                          'tags'
-                      ).select_related(
-                          'author'
-                      ).order_by(
-                          '-pub_date'
-                      ).all()
+            user=request.user
+        ).recipes.filter(
+            tags__slug__in=filters
+        ).distinct().prefetch_related(
+            'tags'
+        ).select_related(
+            'author'
+        ).order_by(
+            '-pub_date'
+        ).all()
 
     else:
         recipe_list = FavoriteRecipes.objects.get(
-                          user=request.user
-                      ).recipes.prefetch_related(
-                          'tags'
-                      ).select_related(
-                          'author'
-                      ).all()
+            user=request.user
+        ).recipes.prefetch_related(
+            'tags'
+        ).select_related(
+            'author'
+        ).all()
 
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
@@ -147,6 +150,7 @@ def shop_list_page(request):
 def recipe_edit(request, recipe_id):
     new_recipe = True
     edit = True
+
     recipe = get_object_or_404(
         Recipe.objects.prefetch_related('tags'), pk=recipe_id)
 
@@ -164,6 +168,7 @@ def recipe_edit(request, recipe_id):
         if form.is_valid():
             form.save()
             recipe.ingredientamount_set.all().delete()
+
             objs = [IngredientAmount(
                 amount=amount, ingredient=Ingredient.objects.get(title=title),
                 recipe=recipe) for title, amount in ingredients.items()]
@@ -192,19 +197,13 @@ def download_shop_list(request):
     recipes = get_object_or_404(ShopList, user=request.user)
 
     ingredient_list = recipes.annotate(
-                          name=F(
-                              'ingredientamount__ingredient__title'
-                          ),
-                          dimension=F(
-                              'ingredientamount__ingredient__dimension'
-                          )
-                      ).values(
-                          'name', 'dimension'
-                      ).annotate(
-                          total=Sum(
-                              'ingredientamount__amount'
-                          )
-                      ).order_by('name')
+        name=F('ingredientamount__ingredient__title'),
+        dimension=F('ingredientamount__ingredient__dimension')
+    ).values(
+        'name', 'dimension'
+    ).annotate(
+        total=Sum('ingredientamount__amount')
+    ).order_by('name')
 
     response = HttpResponse(content_type='text/txt')
     response['Content-Disposition'] = 'attachment; filename="shop-list.txt"'
