@@ -1,3 +1,4 @@
 .vscode
 media/
 venv/
+.env
