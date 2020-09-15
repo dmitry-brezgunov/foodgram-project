@@ -194,7 +194,8 @@ def recipe_delete(request, recipe_id):
 
 @login_required
 def download_shop_list(request):
-    recipes = get_object_or_404(ShopList, user=request.user)
+    shop_list = get_object_or_404(ShopList, user=request.user)
+    recipes = shop_list.recipes.all()
 
     ingredient_list = recipes.annotate(
         name=F('ingredientamount__ingredient__title'),
